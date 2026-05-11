@@ -1,0 +1,12 @@
+node_modules/
+*.log
+*.btsnoop
+*.pcap
+*.pcapng
+*.bin
+captures/
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+.DS_Store

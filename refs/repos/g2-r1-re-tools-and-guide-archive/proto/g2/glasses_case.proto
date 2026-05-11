@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+// glasses_case.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   glasses_case.pb.dart
+//   glasses_case.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eGlassesCaseCommandId {
+  NONE_COMMAND = 0;
+  CASE_INFO = 1;
+}
+
+message GlassesCaseInfo {
+  uint32 soc = 1;
+  uint32 chargeStatus = 2;
+  uint32 lidStatus = 3;
+  uint32 inCaseStatus = 4;
+  eErrorCode errorCode = 5;
+}
+
+message GlassesCaseDataPackage {
+  eGlassesCaseCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  GlassesCaseInfo caseInfo = 3;
+}

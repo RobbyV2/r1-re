@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+// module_configure.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   module_configure.pb.dart
+//   module_configure.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum module_configure_Cmd_list {
+  SYSTEM_GENERAL_SETTING_PACKET = 0;
+  APP_INQUIRE_DASHBOARD_AUTO_CLOSE_VALUE = 1;
+  APP_SET_DASHBOARD_AUTO_CLOSE_VALUE = 2;
+}
+
+message module_configure_main_msg_ctx {
+  module_configure_Cmd_list cmd = 1;
+  uint32 magicRandom = 2;
+  send_system_general_setting SysGeneralSetting = 3;
+  dashboard_general_setting DashboardGeneralSetting = 4;
+}
+
+message dashboard_general_setting {
+  uint32 autoCloseValue = 1;
+}
+
+message send_system_general_setting {
+  uint32 languageIndex = 1;
+}

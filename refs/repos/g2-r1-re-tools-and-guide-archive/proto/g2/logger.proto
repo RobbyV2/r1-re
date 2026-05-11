@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+// logger.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   logger.pb.dart
+//   logger.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum logger_Cmd_list {
+  CONNECT_HEART_PACKET = 0;
+  BLE_LOGGER_SWITCH_SET = 1;
+  BLE_LOGGER_LEVEL_SET = 2;
+  DEVICE_SEND_LOGGER_DATA = 3;
+  REQUEST_FILE_NAME = 4;
+  DELETE_FILE_NAME = 5;
+  DELETE_ALL_LOGGER_FILE = 6;
+}
+
+message logger_main_msg_ctx {
+  logger_Cmd_list cmd = 1;
+  uint32 magicRandom = 2;
+  uint32 bleTransEn = 3;
+  ble_trans_level_msg levelMsg = 4;
+  string logStr = 5;
+  request_filelist_msg requestMsg = 6;
+  delete_file_msg delMsg = 7;
+}
+
+message ble_trans_level_msg {
+  uint32 bleTransLevel = 1;
+}
+
+message delete_file_msg {
+  string fileName = 1;
+}
+
+message request_filelist_msg {
+  repeated string fileName = 1;
+}

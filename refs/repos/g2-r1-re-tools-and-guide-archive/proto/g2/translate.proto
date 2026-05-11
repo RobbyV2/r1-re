@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+// translate.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   translate.pb.dart
+//   translate.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum TranslateCmd {
+  CMD_NONE = 0;
+  OPEN = 1;
+  CLOSE = 2;
+  PAUSE = 3;
+  RESUME = 4;
+}
+
+enum eTranslateCommandId {
+  NONE_COMMAND = 0;
+  TRANSLATE_CTRL = 1;
+  TRANSLATE_RESULT = 2;
+  TRANSLATE_NOTIFY = 161;
+  COMM_RESP = 162;
+  TRANSLATE_MODE_SWITCH = 163;
+  TRANSLATE_HEARTBEAT = 255;
+}
+
+message TranslateHeartBeat {
+  // (no fields)
+}
+
+message TranslateResult {
+  bytes srcText = 1;
+  bytes dstText = 2;
+  eErrorCode errorCode = 3;
+  uint32 endFlag = 4;
+  bytes speaker = 5;
+}
+
+message TranslateControl {
+  TranslateCmd cmd = 1;
+  bytes languagePair = 2;
+  uint32 useAudio = 3;
+  eErrorCode errorCode = 4;
+}
+
+message TranslateResp {
+  eErrorCode errorCode = 1;
+}
+
+message TranslateModeSwitch {
+  uint32 mode = 1;
+}
+
+message TranslateNotify {
+  TranslateCmd cmd = 1;
+  eErrorCode errorCode = 2;
+}
+
+message TranslateDataPackage {
+  eTranslateCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  TranslateControl ctrl = 3;
+  TranslateResult result = 4;
+  TranslateNotify notify = 5;
+  TranslateModeSwitch modeSwitch = 6;
+  TranslateResp resp = 7;
+  TranslateHeartBeat heartbeat = 8;
+}

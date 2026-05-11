@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+// efs_transmit.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   efs_transmit.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eEvenFileServiceType {
+  NOTIFICATION_JSON_WHITELIST = 0;
+  ANDROID_MSG_JSON_NOTIFICATION = 1;
+  OTHER_FILE = 170;
+}
+
+enum eEvenFileServiceRsp {
+  EVEN_FILE_SERVICE_RSP_SUCCESS = 0;
+  EVEN_FILE_SERVICE_RSP_START_ERR = 1;
+  EVEN_FILE_SERVICE_RSP_DATA_CRC_ERR = 2;
+  EVEN_FILE_SERVICE_RSP_FLASH_WRITE_ERR = 3;
+  EVEN_FILE_SERVICE_RSP_TIMEOUT = 4;
+  EVEN_FILE_SERVICE_RSP_NO_RESOURCES = 5;
+  EVEN_FILE_SERVICE_RSP_RESULT_CHECK_FAIL = 6;
+  EVEN_FILE_SERVICE_RSP_FAIL = 7;
+}
+
+enum eEvenFileExportServiceCID {
+  EVEN_FILE_SERVICE_CMD_EXPORT_START = 0;
+  EVEN_FILE_SERVICE_CMD_EXPORT_DATA = 1;
+  EVEN_FILE_SERVICE_CMD_EXPORT_RESULT_CHECK = 2;
+}
+
+enum eEvenFileSendServiceCID {
+  EVEN_FILE_SERVICE_CMD_SEND_START = 0;
+  EVEN_FILE_SERVICE_CMD_SEND_DATA = 1;
+  EVEN_FILE_SERVICE_CMD_SEND_RESULT_CHECK = 2;
+}

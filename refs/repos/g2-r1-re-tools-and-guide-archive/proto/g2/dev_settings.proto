@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+// dev_settings.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   dev_settings.pb.dart
+//   dev_settings.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eAudCmd {
+  AUD_CMD_NONE = 0;
+  AUD_CMD_OPEN = 1;
+  AUD_CMD_CLOSE = 2;
+  AUD_CMD_PAUSE = 3;
+  AUD_CMD_RESUME = 4;
+}
+
+message AudControl {
+  eAudCmd cmd = 1;
+  uint32 status = 2;
+  eErrorCode result = 3;
+}
+
+message TimeSync {
+  uint32 timestamp = 1;
+  int32 timezone = 2;
+  eErrorCode result = 3;
+}
+
+message BaseConnHeartBeat {
+  eErrorCode result = 1;
+}
+
+message QuickRestart {
+  eErrorCode result = 1;
+}
+
+message RestoreFactory {
+  eErrorCode result = 1;
+}

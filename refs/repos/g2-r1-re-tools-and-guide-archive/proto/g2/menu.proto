@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+// menu.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   menu.pb.dart
+//   menu.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum Menu_Cmd_List {
+  APP_SEND_MENU_INFO = 0;
+  OS_RESPONSE_MENU_INFO = 1;
+}
+
+message meun_main_msg_ctx {
+  Menu_Cmd_List Cmd = 1;
+  uint32 MagicRandom = 2;
+  MenuInfoSend sendData = 3;
+  ResponseMenuInfo resData = 4;
+}
+
+message ResponseMenuInfo {
+  uint32 respValue = 1;
+}
+
+message MenuInfoSend {
+  uint32 itemTotalNum = 1;
+  repeated Menu_Item_Ctx item = 2;
+}
+
+message Menu_Item_Ctx {
+  uint32 itemType = 1;
+  uint32 iconNum = 2;
+  string itemName = 3;
+  uint32 itemAppId = 4;
+}

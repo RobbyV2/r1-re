@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+// conversate.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   conversate.pb.dart
+//   conversate.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum ConversateTagType {
+  TAG_TYPE_NONE = 0;
+  TAG_TYPE_KNOWLEDGE = 1;
+  TAG_TYPE_QUESTION = 2;
+  TAG_TYPE_PEOPLEWIKI = 3;
+  TAG_TYPE_SUGGEST = 4;
+}
+
+enum ConversateErrorCode {
+  CONVERSATE_SUCCESS = 0;
+  CONVERSATE_ERR_FAIL = 1;
+  CONVERSATE_ERR_NETWORK = 2;
+}
+
+enum ConversateCtrlCmd {
+  CMD_NONE = 0;
+  START = 1;
+  CLOSE = 2;
+  PAUSE = 3;
+  RESUME = 4;
+  CONFIG = 5;
+}
+
+enum ConversateCommandId {
+  CONVERSATE_NONE = 0;
+  CONVERSATE_CONTROL = 1;
+  CONVERSATE_PREP_NOTE_LIST_REQUEST = 2;
+  CONVERSATE_PREP_NOTE_LIST = 3;
+  CONVERSATE_PREP_NOTE_SELECT = 4;
+  CONVERSATE_TAG_DATA = 5;
+  CONVERSATE_TRANSCRIBE_DATA = 6;
+  CONVERSATE_PREP_NOTE_PACKET = 7;
+  CONVERSATE_STATUS_NOTIFY = 161;
+  CONVERSATE_COMM_RESP = 162;
+  CONVERSATE_TAG_TRACKING_DATA = 163;
+  CONVERSATE_HEART_BEAT = 255;
+}
+
+message ConversateHeartBeat {
+  // (no fields)
+}
+
+message ConversateCommResp {
+  ConversateErrorCode errCode = 1;
+}
+
+message ConversateTagTrackingData {
+  uint32 tagId = 1;
+  uint32 openType = 2;
+  uint32 closeType = 3;
+  uint32 durationTimeMs = 4;
+}
+
+message ConversateStatusNotify {
+  ConversateCtrlCmd cmd = 1;
+  ConversateErrorCode errCode = 2;
+}
+
+message ConversateTranscribeData {
+  bytes transcribeText = 1;
+  uint32 transcribeEndFlag = 2;
+}
+
+message ConversateTagData {
+  ConversateTagType tagType = 1;
+  bytes tagText = 2;
+  bytes tagTextExtend = 3;
+  uint32 tagId = 4;
+}
+
+message ConversateControl {
+  ConversateCtrlCmd cmd = 1;
+  ConversateSettings settings = 2;
+  ConversatePrepNote noteInfo = 3;
+  ConversateErrorCode errCode = 4;
+}
+
+message ConversatePrepNotePacket {
+  uint32 packetIndex = 1;
+  bytes text = 2;
+}
+
+message ConversatePrepNote {
+  bytes title = 1;
+  uint32 totalPackets = 2;
+}
+
+message ConversatePrepNoteSelect {
+  uint32 isSkip = 1;
+  uint32 selectId = 2;
+}
+
+message ConversatePrepNoteListRequest {
+  // (no fields)
+}
+
+message ConversatePrepNoteList {
+  repeated ConversatePrepNoteListItem list = 1;
+  uint32 selectId = 2;
+}
+
+message ConversatePrepNoteListItem {
+  uint32 id = 1;
+  bytes title = 2;
+}
+
+message ConversateSettings {
+  uint32 aiCue = 1;
+  uint32 transcribe = 2;
+  uint32 autoPopEn = 3;
+  uint32 useAudio = 4;
+  uint32 cueDuration = 5;
+}
+
+message ConversateDataPackage {
+  ConversateCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  ConversateControl ctrl = 3;
+  ConversatePrepNoteListRequest prepNoteListRequest = 4;
+  ConversatePrepNoteList prepNoteList = 5;
+  ConversatePrepNoteSelect prepNoteSelect = 6;
+  ConversateTagData tagData = 7;
+  ConversateTranscribeData transcribeData = 8;
+  ConversateStatusNotify statusNotify = 9;
+  ConversateCommResp commResp = 10;
+  ConversateHeartBeat heartBeat = 11;
+  ConversateTagTrackingData tagTrackingData = 12;
+  ConversatePrepNotePacket prepNotePacket = 13;
+}

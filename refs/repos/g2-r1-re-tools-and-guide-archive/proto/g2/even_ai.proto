@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+// even_ai.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   even_ai.pb.dart
+//   even_ai.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eEvenAIEvent {
+  EVENT_NONE = 0;
+  SCROLL = 1;
+  STREAM_COMPLETE = 2;
+}
+
+enum eEvenAIPrompt {
+  PROMPT_NONE = 0;
+  NETWORK_ERR = 1;
+  BLE_DISCONNECT = 2;
+  SERVER_ERR = 3;
+  TROUBLE_UNDERSTAND = 4;
+  COMMAND_UNSUPPORT = 5;
+  AUDIO_ERROR = 6;
+  ASR_SERVER_ERR = 7;
+  AI_SERVER_ERR = 8;
+  COMMAND_EXE_FAIL = 9;
+}
+
+enum eEvenAISkill {
+  SKILL_NONE = 0;
+  BRIGHTNESS = 1;
+  TRANSLATE_CTRL = 2;
+  NOTIFICATION = 3;
+  TELEPROMPT = 4;
+  NAVIGATE = 5;
+  CONVERSATE = 6;
+  QUICKLIST = 7;
+  AUTO_BRIGHTNESS = 8;
+}
+
+enum eEvenAIVADStatus {
+  VAD_STATUS_UNKNOWN = 0;
+  VAD_START = 1;
+  VAD_END = 2;
+  VAD_TIMEOUT = 3;
+}
+
+enum eEvenAIStatus {
+  STATUS_UNKNOWN = 0;
+  EVEN_AI_WAKE_UP = 1;
+  EVEN_AI_ENTER = 2;
+  EVEN_AI_EXIT = 3;
+}
+
+enum eEvenAICommandId {
+  NONE_COMMAND = 0;
+  CTRL = 1;
+  VAD_INFO = 2;
+  ASK = 3;
+  ANALYSE = 4;
+  REPLY = 5;
+  SKILL = 6;
+  PROMPT = 7;
+  EVENT = 8;
+  HEARTBEAT = 9;
+  CONFIG = 10;
+  COMM_RSP = 161;
+}
+
+message EvenAIConfig {
+  uint32 voiceSwitch = 1;
+  uint32 streamSpeed = 2;
+  eErrorCode errorCode = 3;
+  uint32 duplexMode = 4;
+}
+
+message EvenAICommRsp {
+  eErrorCode errorCode = 1;
+}
+
+message EvenAIHeartbeat {
+  uint32 hbCnt = 1;
+  eErrorCode errorCode = 2;
+}
+
+message EvenAIEvent {
+  eEvenAIEvent event = 1;
+  eErrorCode errorCode = 2;
+}
+
+message EvenAIPromptInfo {
+  eEvenAIPrompt promptType = 1;
+  eErrorCode errorCode = 2;
+}
+
+message EvenAISkillInfo {
+  uint32 streamEnable = 1;
+  eEvenAISkill skillId = 2;
+  uint32 skillParam = 3;
+  bytes text = 4;
+  eErrorCode errorCode = 5;
+  uint32 fTextEnd = 6;
+}
+
+message EvenAIReplyInfo {
+  uint32 cmdCnt = 1;
+  uint32 streamEnable = 2;
+  uint32 textMode = 3;
+  bytes text = 4;
+  eErrorCode errorCode = 5;
+  uint32 fTextEnd = 6;
+}
+
+message EvenAIAnalyseInfo {
+  eErrorCode errorCode = 1;
+}
+
+message EvenAIAskInfo {
+  uint32 cmdCnt = 1;
+  uint32 streamEnable = 2;
+  uint32 textMode = 3;
+  bytes text = 4;
+  eErrorCode errorCode = 5;
+}
+
+message EvenAIVADInfo {
+  eEvenAIVADStatus vadStatus = 1;
+  eErrorCode errorCode = 2;
+}
+
+message EvenAIControl {
+  eEvenAIStatus status = 1;
+  eErrorCode errorCode = 2;
+}
+
+message EvenAIDataPackage {
+  eEvenAICommandId commandId = 1;
+  uint32 magicRandom = 2;
+  EvenAIControl ctrl = 3;
+  EvenAIVADInfo vadInfo = 4;
+  EvenAIAskInfo askInfo = 5;
+  EvenAIAnalyseInfo analyseInfo = 6;
+  EvenAIReplyInfo replyInfo = 7;
+  EvenAISkillInfo skillInfo = 8;
+  EvenAIPromptInfo promptInfo = 9;
+  EvenAIEvent event = 10;
+  EvenAIHeartbeat heartbeat = 11;
+  EvenAICommRsp resp = 12;
+  EvenAIConfig config = 13;
+}

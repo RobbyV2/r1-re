@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+// notification.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   notification.pb.dart
+//   notification.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eNotificationCommandId {
+  NONE_COMMAND = 0;
+  NOTIFICATION_CTRL = 1;
+  NOTIFICATION_IOS = 2;
+  NOTIFICATION_WHITELIST_CTRL = 3;
+  NOTIFICATION_COMM_RSP = 161;
+}
+
+message NotificationWhitelistCtrl {
+  uint32 whitelistDisable = 1;
+  eErrorCode errorCode = 2;
+}
+
+message NotificationCommRsp {
+  eNotificationCommandId commandId = 1;
+  eErrorCode errorCode = 2;
+}
+
+message NotificationIOS {
+  bytes appID = 1;
+  bytes displayName = 2;
+  eErrorCode errorCode = 3;
+}
+
+message NotificationControl {
+  uint32 notifEnable = 1;
+  uint32 autoDispEnable = 2;
+  uint32 dispTime = 3;
+  eErrorCode errorCode = 4;
+  uint32 avoidDisturbEnable = 5;
+}
+
+message NotificationDataPackage {
+  eNotificationCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  NotificationControl ctrl = 3;
+  NotificationIOS IOS = 4;
+  NotificationCommRsp resp = 5;
+  NotificationWhitelistCtrl whitelistCtrl = 6;
+}

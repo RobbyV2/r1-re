@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+// quicklist.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   quicklist.pb.dart
+//   quicklist.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eQuicklistEvent {
+  NONE_EVENT = 0;
+  UPDATE_DATA_UP = 1;
+  UPDATE_DATA_DOWN = 2;
+}
+
+enum eQuicklistDataType {
+  UNKNOWN_TYPE = 0;
+  FULL_UPDATE = 1;
+  ADD = 2;
+  MODIFY = 3;
+  DELETE = 4;
+}
+
+enum eQuicklistTsType {
+  DATETIME = 0;
+  DATE = 1;
+  TIME = 2;
+}
+
+enum eQuicklistCommandId {
+  NONE_COMMAND = 0;
+  ITEM = 1;
+  MULT_ITEMS = 2;
+  EVENT = 3;
+}
+
+message QuicklistEvent {
+  eQuicklistEvent event = 1;
+  uint32 uid = 2;
+  eErrorCode errorCode = 3;
+}
+
+message QuicklistMultItems {
+  eQuicklistDataType dataType = 1;
+  uint32 totalCount = 2;
+  repeated QuicklistItem items = 3;
+  eErrorCode errorCode = 4;
+}
+
+message QuicklistItem {
+  uint32 uid = 1;
+  uint32 index = 2;
+  uint32 isCompleted = 3;
+  int64 timestamp = 4;
+  bytes title = 5;
+  eErrorCode errorCode = 6;
+  eQuicklistTsType tsType = 7;
+}
+
+message QuicklistDataPackage {
+  eQuicklistCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  QuicklistItem item = 3;
+  QuicklistMultItems multItems = 4;
+  QuicklistEvent event = 5;
+}

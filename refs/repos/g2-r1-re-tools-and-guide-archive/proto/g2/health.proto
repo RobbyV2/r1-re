@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+// health.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   health.pb.dart
+//   health.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eHealthDataTrend {
+  UNKNOWN_TREND = 0;
+  UP_TREND = 1;
+  STEADY_TREND = 2;
+  DOWN_TREND = 3;
+}
+
+enum eHealthDataType {
+  UNKNOWN_TYPE = 0;
+  ALL = 1;
+  STEPS = 2;
+  CALORIES = 3;
+  SLEEP = 4;
+  HEART_RATE = 5;
+  BLOOD_OXYGEN = 6;
+  TEMPERATURE = 7;
+  HRV = 8;
+  PRODUCTIVITY = 9;
+}
+
+enum eHealthCommandId {
+  NONE_COMMAND = 0;
+  SINGLE_DATA = 1;
+  MULT_DATA = 2;
+  SINGLE_HIGHLIGHT = 3;
+  MULT_HIGHLIGHT = 4;
+}
+
+message HealthMultHighlight {
+  repeated HealthSingleHighlight Highlight = 1;
+  eErrorCode errorCode = 2;
+}
+
+message HealthSingleHighlight {
+  eHealthDataType dataType = 1;
+  bytes text = 2;
+  eErrorCode errorCode = 3;
+}
+
+message HealthMultData {
+  eHealthDataType dataType = 1;
+  repeated HealthSingleData dataSet = 2;
+  eErrorCode errorCode = 3;
+}
+
+message HealthSingleData {
+  eHealthDataType dataType = 1;
+  uint32 goal = 2;
+  double value = 3;
+  double avgValue = 4;
+  uint32 duration = 5;
+  eErrorCode errorCode = 6;
+  eHealthDataTrend trend = 7;
+}
+
+message HealthDataPackage {
+  eHealthCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  HealthSingleData singleData = 3;
+  HealthMultData multData = 4;
+  HealthSingleHighlight singleHighlight = 5;
+  HealthMultHighlight multHighlight = 6;
+}

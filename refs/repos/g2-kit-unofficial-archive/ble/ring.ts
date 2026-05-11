@@ -1,0 +1,530 @@
+// BLE packet helpers for the Even Realities R1 smart ring.
+//
+// The ring is a separate BLE peripheral advertising under names like
+// `EVEN R1_<last-3-MAC-bytes>` (e.g. `EVEN R1_508B74`). Its primary service
+// exposes two pairs of write+notify characteristics; all traffic observed
+// from the official `com.even.sg` app uses the second pair (bae80012 /
+// bae80013) — the first pair (bae80010 / bae80011) is unused or reserved.
+//
+// Unlike the G2 glasses (which speak `aa 12`-framed protobuf), the ring
+// uses a compact binary frame:
+//
+//   [0]     = 0x00 frame marker
+//   [1..4]  = 4-byte session hash (random per-packet, anti-replay;
+//             the ring silently drops writes that replay a hash it's
+//             recently accepted)
+//   [5]     = 0x64 marker
+//   [6]     = seq group (0x01 or 0x02; 0x01 is the default, 0x02 is used
+//             for a small set of commands that need group-addressed replies)
+//   [7]     = 0x64 marker
+//   [8]     = sequence number (u8, increments per write within a session)
+//   [9..10] = flags (u16 BE)  0x0000=req, 0x0001=set, 0x0002=push,
+//                             0x0003=response
+//   [11]    = 0x00 spacer
+//   [12]    = cmd byte (BleRing1Cmd enum on wire)
+//   [13]    = sub byte (BleRing1SubCmd via firmware lookup table — NOT the
+//             raw enum ordinal; e.g. pairAuth maps to 0x0d, getAlgoKey to
+//             0x0c, responses to 0x18/0x25 depending on command)
+//   [14]    = 0x00 spacer
+//   [15..]  = payload (variable length, NO trailing CRC)
+//
+// Verified against HCI snoop captures of the real `com.even.sg` app on
+// 2026-04-13 and 2026-04-16 (see `~/g2-re/captures/` and
+// `~/.claude/projects/-Users-elinaro/memory/project_r1_ring_protocol.md`).
+
+// ---------- BLE service / characteristic UUIDs ----------
+
+export const R1_SERVICE_UUID = "bae80001-4f05-4503-8e65-3af1f7329d1f";
+export const R1_WRITE_CHAR_UUID = "bae80012-4f05-4503-8e65-3af1f7329d1f";
+export const R1_NOTIFY_CHAR_UUID = "bae80013-4f05-4503-8e65-3af1f7329d1f";
+
+// Ring advertisement regex. The manufacturer-data blob begins with 0x45 0x52
+// ("ER" = Even Realities) and carries the MAC reversed; for scanning by name:
+export const R1_NAME_RE = /^EVEN\s+R1_([0-9A-F]{6})$/i;
+
+// ---------- Cmd / flag constants ----------
+
+// Observed wire-level cmd bytes. Names are best-effort from the
+// Dart-decompiled `BleRing1Cmd` enum, but the byte-to-name mapping isn't
+// strictly the enum ordinal — the firmware uses a lookup table that we
+// haven't fully reversed. Always prefer the empirically-observed byte
+// (captured in HCI snoop) over the name when they disagree.
+export const R1_CMD = {
+  /** pairAuth init/complete — paired with sub=0x0d. Despite the Dart
+   *  BleRing1Module.system.pairAuth grouping, the wire cmd byte for
+   *  pairAuth is 0x08 (not 0x00). */
+  pairAuth: 0x08,
+  heartRate: 0x01,
+  firmware: 0x02,            // cmd=0x02 sub=0x0c is the firmware query/response (not spo2 as the enum name might suggest)
+  temperature: 0x03,
+  hrv: 0x04,
+  activity: 0x05,            // also carries phone→ring time-sync pushes on sub=0x12
+  sleep: 0x06,
+  sportRunCtrl: 0x07,
+  healthSetting: 0x09,
+  // Extended: observed on the wire during the normal app pair sequence
+  // but don't appear in the `BleRing1Cmd` Dart enum (which stops at 0x09).
+  // Likely internal/undocumented subsystems:
+  linkToGlasses: 0x0a,       // pair/bind with G2 glasses (sub=0x12)
+  algoKey: 0x0b,             // get current session key (sub=0x0c req, 0x25 resp)
+  config1: 0x0e,             // config readout (sub=0x0c req, 0x18 resp)
+  config2: 0x0f,             // second config readout (sub=0x0c req, 0x18 resp)
+  serial: 0x11,              // serial-number async push (sub=0x85)
+  phoneStatus: 0x7e,         // phone→ring status push (sub=0x16, flags=0x0001)
+  phoneStatusAck: 0x7f,      // ring's ack for phoneStatus (sub=0x13)
+} as const;
+
+export const R1_FLAGS = {
+  REQUEST: 0x0000,
+  SET: 0x0001,
+  PUSH: 0x0002,
+  RESPONSE: 0x0003,
+} as const;
+
+// ---------- Low-level packet builder ----------
+
+export interface RingPacketOptions {
+  seq: number;                     // sequence number (0-255)
+  flags?: number;                  // defaults to REQUEST (0x0000)
+  seqGroup?: 0x01 | 0x02;          // defaults to 0x01
+  cmd: number;
+  sub: number;
+  payload?: Uint8Array | Buffer;
+  /**
+   * 4-byte anti-replay hash placed at bytes [1..4]. Defaults to four
+   * cryptographically random bytes, which the ring accepts silently. Only
+   * override if you're replaying a captured packet verbatim — the ring
+   * will disconnect within ~15s if it sees the same hash twice.
+   */
+  hash?: Uint8Array;
+}
+
+export function buildRingPacket(opts: RingPacketOptions): Uint8Array {
+  const hash = opts.hash ?? randomHash();
+  if (hash.length !== 4) {
+    throw new Error(`ring packet hash must be 4 bytes, got ${hash.length}`);
+  }
+  const seqGroup = opts.seqGroup ?? 0x01;
+  const flags = opts.flags ?? R1_FLAGS.REQUEST;
+  const payload = opts.payload ?? new Uint8Array(0);
+  const out = new Uint8Array(15 + payload.length);
+  out[0] = 0x00;
+  out.set(hash, 1);
+  out[5] = 0x64;
+  out[6] = seqGroup;
+  out[7] = 0x64;
+  out[8] = opts.seq & 0xff;
+  out[9] = (flags >> 8) & 0xff;
+  out[10] = flags & 0xff;
+  out[11] = 0x00;
+  out[12] = opts.cmd & 0xff;
+  out[13] = opts.sub & 0xff;
+  out[14] = 0x00;
+  out.set(payload, 15);
+  return out;
+}
+
+function randomHash(): Uint8Array {
+  const b = new Uint8Array(4);
+  crypto.getRandomValues(b);
+  return b;
+}
+
+// ---------- Packet parser ----------
+
+export interface ParsedRingPacket {
+  ok: boolean;
+  hash: Uint8Array;
+  seqGroup: number;
+  seq: number;
+  flags: number;
+  cmd: number;
+  sub: number;
+  payload: Uint8Array;
+}
+
+export function parseRingPacket(buf: Uint8Array): ParsedRingPacket {
+  if (buf.length < 15 || buf[0] !== 0x00 || buf[5] !== 0x64 || buf[7] !== 0x64) {
+    return {
+      ok: false,
+      hash: new Uint8Array(0),
+      seqGroup: 0, seq: 0, flags: 0, cmd: 0, sub: 0,
+      payload: new Uint8Array(0),
+    };
+  }
+  return {
+    ok: true,
+    hash: buf.subarray(1, 5),
+    seqGroup: buf[6]!,
+    seq: buf[8]!,
+    flags: (buf[9]! << 8) | buf[10]!,
+    cmd: buf[12]!,
+    sub: buf[13]!,
+    payload: buf.subarray(15),
+  };
+}
+
+// ---------- High-level command builders ----------
+
+/**
+ * Build the `cmd=0x0a sub=0x12` command that binds the ring to a pair of
+ * G2 glasses. Without this, ring taps/scrolls never relay to the phone —
+ * the ring doesn't know which glasses to route events through.
+ *
+ * The official app sends this command TWICE in a row during its pair init
+ * (immediately after pairAuth, config queries, and time sync), with
+ * different random nonces each time. Observed in snoop captures; the
+ * two-byte prefix is consumed as a freshness token.
+ *
+ * @param glassesMac  The G2 right-arm MAC in normal big-endian form,
+ *                    e.g. "D4:5B:37:A7:A3:63". The left arm follows the
+ *                    right on its own channel; only the right arm's MAC
+ *                    goes into this command.
+ * @param seq         Sequence number (0-255)
+ * @param nonce       Optional 2-byte freshness prefix; defaults to random.
+ */
+export function buildLinkToGlasses(
+  glassesMac: string,
+  seq: number,
+  nonce?: Uint8Array,
+): Uint8Array {
+  const macBytes = parseMac(glassesMac);
+  const macReversed = macBytes.slice().reverse();
+  const prefix = nonce ?? randomNonce2();
+  if (prefix.length !== 2) {
+    throw new Error(`nonce must be 2 bytes, got ${prefix.length}`);
+  }
+  const payload = new Uint8Array(8);
+  payload.set(prefix, 0);
+  payload.set(macReversed, 2);
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.REQUEST,
+    cmd: R1_CMD.linkToGlasses,
+    sub: 0x12,
+    payload,
+  });
+}
+
+function randomNonce2(): Uint8Array {
+  const b = new Uint8Array(2);
+  crypto.getRandomValues(b);
+  return b;
+}
+
+function parseMac(mac: string): Uint8Array {
+  const hex = mac.replace(/[:\-]/g, "");
+  if (hex.length !== 12) {
+    throw new Error(`invalid MAC ${JSON.stringify(mac)} — expected 6 bytes`);
+  }
+  const out = new Uint8Array(6);
+  for (let i = 0; i < 6; i++) {
+    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
+
+/**
+ * Build the pairAuth init packet (`cmd=0x08 sub=0x0d`). The payload is
+ * session-specific and normally derived from a challenge-response with
+ * the ring's async push; replaying a captured init works exactly once
+ * per ring power-cycle, after which the ring silently drops duplicates.
+ *
+ * For fresh sessions without a known derivation, replay a recent capture
+ * and accept that subsequent commands may not work until the full pair
+ * handshake completes (setAlgoKey with the server-issued pkey, see
+ * `/v2/g/health/get_pkey` in `~/bletools/API.md`).
+ */
+export function buildPairAuthInit(seq: number, payload: Uint8Array): Uint8Array {
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.REQUEST,
+    cmd: R1_CMD.pairAuth,  // 0x08 on the wire
+    sub: 0x0d,
+    payload,
+  });
+}
+
+/**
+ * Build a time-sync push to the ring. The ring uses this to timestamp
+ * subsequent health samples (heart rate, activity, etc).
+ *
+ * Wire format observed: `b9 0e 10 ff` header followed by a u32 LE unix
+ * timestamp. The header bytes appear to be static per firmware version —
+ * this helper emits the same bytes the app does.
+ *
+ * @param seq      Sequence number (0-255)
+ * @param unixSec  Unix epoch seconds, defaults to now.
+ */
+export function buildTimeSync(seq: number, unixSec?: number): Uint8Array {
+  const ts = unixSec ?? Math.floor(Date.now() / 1000);
+  const payload = new Uint8Array(8);
+  payload[0] = 0xb9;
+  payload[1] = 0x0e;
+  payload[2] = 0x10;
+  payload[3] = 0xff;
+  payload[4] = ts & 0xff;
+  payload[5] = (ts >>> 8) & 0xff;
+  payload[6] = (ts >>> 16) & 0xff;
+  payload[7] = (ts >>> 24) & 0xff;
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.PUSH,
+    cmd: R1_CMD.activity,  // 0x05 — same cmd byte as activity samples; sub=0x12 selects the time-sync variant
+    sub: 0x12,
+    payload,
+  });
+}
+
+/**
+ * Build a config-group-1 query (cmd=0x0e sub=0x0c). The app sends this
+ * during pair init right after pairAuth; the ring responds with a 13-byte
+ * blob on sub=0x18 (various firmware settings).
+ *
+ * Payload is a 2-byte freshness nonce; the ring doesn't verify its
+ * contents but echoes a different 2-byte value in its response.
+ */
+export function buildConfig1Get(seq: number, nonce?: Uint8Array): Uint8Array {
+  const prefix = nonce ?? randomNonce2();
+  if (prefix.length !== 2) {
+    throw new Error(`nonce must be 2 bytes, got ${prefix.length}`);
+  }
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.REQUEST,
+    cmd: 0x0e,
+    sub: 0x0c,
+    payload: prefix,
+  });
+}
+
+/**
+ * Build a config-group-2 query (cmd=0x0f sub=0x0c). Same shape as
+ * buildConfig1Get but a different group; the app sends both in sequence.
+ */
+export function buildConfig2Get(seq: number, nonce?: Uint8Array): Uint8Array {
+  const prefix = nonce ?? randomNonce2();
+  if (prefix.length !== 2) {
+    throw new Error(`nonce must be 2 bytes, got ${prefix.length}`);
+  }
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.REQUEST,
+    cmd: 0x0f,
+    sub: 0x0c,
+    payload: prefix,
+  });
+}
+
+/**
+ * Build an HRV init packet (cmd=0x04 sub=0x18). The app sends this
+ * sandwiched between the two linkToGlasses calls during pair init — it
+ * puts the ring into HRV sampling mode, which also enables the algorithm
+ * that feeds tap/scroll events out over RF to the glasses.
+ *
+ * Payload shape: `[2-byte nonce] [0x02] [11 × 0x00]` (14 bytes).
+ */
+export function buildHrvInit(seq: number, nonce?: Uint8Array): Uint8Array {
+  const prefix = nonce ?? randomNonce2();
+  if (prefix.length !== 2) {
+    throw new Error(`nonce must be 2 bytes, got ${prefix.length}`);
+  }
+  const payload = new Uint8Array(14);
+  payload[0] = prefix[0]!;
+  payload[1] = prefix[1]!;
+  payload[2] = 0x02;
+  return buildRingPacket({
+    seq,
+    flags: R1_FLAGS.REQUEST,
+    cmd: 0x04,
+    sub: 0x18,
+    payload,
+  });
+}
+
+// ---------- Accelerometer / IMU ----------
+
+/**
+ * The G2 glasses + R1 ring both ship 3-axis accelerometers. The firmware
+ * exposes readings through the `Sys_ItemEvent.IMUData` proto field (a
+ * `{ double x, y, z }` tuple) alongside CLICK_EVENT / DOUBLE_CLICK, and
+ * also as standalone `EventType = 8 IMU_DATA_REPORT` events.
+ *
+ * **Caveat:** we've never observed the firmware actually populate
+ * `IMUData` in the wild — in every captured sys-event the field was
+ * absent, even during rapid taps. Either the firmware has gated the
+ * stream behind a config command we haven't identified, or the feature
+ * was defined in the proto but never wired. Decoders are provided
+ * anyway so consumers are ready if/when the hardware starts reporting.
+ *
+ * Source channels to watch:
+ *   - Ring native BLE: cmd=0x01 sub=?? push (not yet seen).
+ *   - Glasses G2 proto: `Sys_ItemEvent.IMUData` inside
+ *     `evenhub_main_msg_ctx.DevEvent.SysEvent` on sid=0xe0 flag=0x01.
+ *     The `EventSource` distinguishes ring vs glasses vs dummy.
+ */
+export interface ImuReading {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** Normalize the `IMU_Report_Data` proto value into a plain reading. */
+export function normalizeImu(imu: { x?: number; y?: number; z?: number } | undefined | null): ImuReading | null {
+  if (!imu) return null;
+  const x = imu.x ?? 0;
+  const y = imu.y ?? 0;
+  const z = imu.z ?? 0;
+  // Treat an all-zero reading as "absent" — the firmware default state.
+  if (x === 0 && y === 0 && z === 0) return null;
+  return { x, y, z };
+}
+
+/**
+ * Extract IMU data from a decoded `SysEvent`, returning null when the
+ * firmware didn't populate the field (observed default).
+ */
+export function extractImuFromSysEvent(
+  ev: { IMUData?: { x?: number; y?: number; z?: number } } | undefined | null,
+): ImuReading | null {
+  if (!ev) return null;
+  return normalizeImu(ev.IMUData);
+}
+
+// Re-export the G2 sys-event decoder so consumers can pull ring-originated
+// taps out of the glasses' NotifyApp channel without reaching into
+// `events.ts` themselves. Ring taps arrive at the phone as:
+//   glasses h=0x0844 → parseFrame → sid=0xe0 flag=0x01 → decodeAsyncEvent
+//   → { kind:"sys-event", eventType, eventSource }
+// with eventSource === EventSourceType.TOUCH_EVENT_FROM_RING (=2).
+export { EventSourceType } from "./gen/EvenHub_pb";
+
+// ---------- Health push decoder ----------
+
+/**
+ * The ring autonomously streams health samples over its notify channel
+ * as it takes measurements. Each push follows a common header shape:
+ *
+ *   [0..1]  2-byte per-push nonce / hash (varies)
+ *   [2]     flag byte (01 / 02 / 03 / 04 — seems to gate data types)
+ *   [3..4]  fixed marker `10 ff`
+ *   [5..8]  u32 LE window-start timestamp (usually 00:00 UTC of the day)
+ *   [9..12] u32 LE sample timestamp (unix seconds)
+ *   [13..]  metric-specific tail (see per-subcmd notes)
+ *
+ * Observed sub-codes on cmd=0x01:
+ *   0x1c  small push, 5-byte tail — unidentified, frequent during streaming
+ *   0x20  activity (steps) — tail is u8 sentinel + u16 LE samples
+ *   0x24  heart rate — tail is groups of `[offset_min][bpm]×3` at varying
+ *         intervals; BPM bytes are raw integers (e.g. 0x56=86 bpm)
+ *   0x28  multi-metric roll-up — pairs of (type, value) in the tail
+ *   0x2f  long multi-metric window
+ *
+ * The tail formats vary per sub and are not fully reversed yet — consumers
+ * should treat `tail` as opaque bytes and specialize per sub as needed.
+ */
+export interface RingHealthPush {
+  kind: "ring-health";
+  cmd: number;
+  sub: number;
+  subName: "heartRate" | "activity" | "multi" | "other";
+  flagByte: number;
+  windowStartUnix: number;
+  sampleUnix: number;
+  windowStart: Date;
+  sample: Date;
+  tail: Uint8Array;
+  /** Raw payload including header. */
+  payload: Uint8Array;
+}
+
+export function tryDecodeHealthPush(parsed: ParsedRingPacket): RingHealthPush | null {
+  if (!parsed.ok) return null;
+  if (parsed.cmd !== R1_CMD.heartRate) return null;  // 0x01
+  const p = parsed.payload;
+  if (p.length < 13) return null;
+  if (p[3] !== 0x10 || p[4] !== 0xff) return null;   // fixed marker check
+
+  const windowStartUnix = readU32LE(p, 5);
+  const sampleUnix = readU32LE(p, 9);
+  const sub = parsed.sub;
+  const subName: RingHealthPush["subName"] =
+    sub === 0x24 ? "heartRate" :
+    sub === 0x20 ? "activity" :
+    sub === 0x28 ? "multi" : "other";
+
+  return {
+    kind: "ring-health",
+    cmd: parsed.cmd,
+    sub: parsed.sub,
+    subName,
+    flagByte: p[2]!,
+    windowStartUnix,
+    sampleUnix,
+    windowStart: new Date(windowStartUnix * 1000),
+    sample: new Date(sampleUnix * 1000),
+    tail: p.subarray(13),
+    payload: p,
+  };
+}
+
+/**
+ * Best-effort parser for the heart-rate tail (sub=0x24). Tail has groups
+ * of four bytes each: [interval_minutes, bpm, bpm, bpm]. Three samples per
+ * interval group in observed captures, though group count varies.
+ */
+export function decodeHeartRateTail(tail: Uint8Array): { intervalMin: number; bpm: number[] }[] {
+  const out: { intervalMin: number; bpm: number[] }[] = [];
+  let i = 0;
+  while (i + 3 < tail.length) {
+    out.push({
+      intervalMin: tail[i]!,
+      bpm: [tail[i + 1]!, tail[i + 2]!, tail[i + 3]!],
+    });
+    i += 4;
+  }
+  return out;
+}
+
+/**
+ * Best-effort parser for the activity tail (sub=0x20). Tail has a u8
+ * sentinel/count followed by u16 LE sample values (steps-per-minute
+ * typically).
+ */
+export function decodeActivityTail(tail: Uint8Array): number[] {
+  const out: number[] = [];
+  // Skip the first byte if it looks like a sentinel < 255, then read u16 LE pairs.
+  let i = 0;
+  while (i + 1 < tail.length) {
+    out.push(tail[i]! | (tail[i + 1]! << 8));
+    i += 2;
+  }
+  return out;
+}
+
+function readU32LE(b: Uint8Array, off: number): number {
+  return (b[off]! | (b[off + 1]! << 8) | (b[off + 2]! << 16) | (b[off + 3]! << 24)) >>> 0;
+}
+
+// ---------- Firmware / serial parsers ----------
+
+/** Parse the `cmd=0x02 sub=0x2c` firmware-version response. */
+export function decodeFirmware(parsed: ParsedRingPacket): { hw: string; sw: string } | null {
+  if (!parsed.ok || parsed.cmd !== 0x02 || parsed.sub !== 0x2c) return null;
+  const p = parsed.payload;
+  if (p.length < 34) return null;
+  const decode = (buf: Uint8Array) =>
+    Buffer.from(buf).toString("utf8").replace(/\0+$/g, "").replace(/[\x00-\x1f]+/g, "");
+  return {
+    hw: decode(p.subarray(2, 18)),
+    sw: decode(p.subarray(18, 34)),
+  };
+}
+
+/** Parse the `cmd=0x11 sub=0x85` serial-number push. */
+export function decodeSerial(parsed: ParsedRingPacket): { serial: string } | null {
+  if (!parsed.ok || parsed.cmd !== 0x11 || parsed.sub !== 0x85) return null;
+  const ascii = Buffer.from(parsed.payload).toString("utf8");
+  const m = ascii.match(/[A-Z0-9]{15,}/);
+  return m ? { serial: m[0] } : null;
+}

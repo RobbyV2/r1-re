@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+// transcribe.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   transcribe.pb.dart
+//   transcribe.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum TranscribeCmd {
+  CMD_NONE = 0;
+  OPEN = 1;
+  CLOSE = 2;
+  PAUSE = 3;
+  RESUME = 4;
+  CONFIG = 5;
+}
+
+enum eTranscribeCommandId {
+  NONE_COMMAND = 0;
+  TRANSCRIBE_CTRL = 1;
+  TRANSCRIBE_RESULT = 2;
+  TRANSCRIBE_NOTIFY = 161;
+  COMM_RESP = 162;
+  TRANSCRIBE_HEARTBEAT = 255;
+}
+
+message TranscribeHeartBeat {
+  eErrorCode errorCode = 1;
+}
+
+message TranscribeResp {
+  eErrorCode errorCode = 1;
+}
+
+message TranscribeNotify {
+  TranscribeCmd cmd = 1;
+  eErrorCode errorCode = 2;
+}
+
+message TranscribeResult {
+  bytes text = 1;
+  eErrorCode errorCode = 2;
+  uint32 endFlag = 3;
+  bytes speaker = 4;
+}
+
+message TranscribeControl {
+  TranscribeCmd cmd = 1;
+  uint32 noteIdx = 2;
+  eErrorCode errorCode = 3;
+}
+
+message TranscribeDataPackage {
+  eTranscribeCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  TranscribeControl ctrl = 3;
+  TranscribeResult result = 4;
+  TranscribeNotify notify = 5;
+  TranscribeResp resp = 6;
+  TranscribeHeartBeat heartbeat = 7;
+}

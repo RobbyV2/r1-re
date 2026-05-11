@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+// common.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   common.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eErrorCode {
+  SUCCESS = 0;
+  CRC = 1;
+  PKT_LOST = 2;
+  TIMEOUT = 3;
+  NO_RESOURCES = 4;
+  PB_ERROR = 5;
+  NULL = 6;
+  FAIL = 7;
+  NOT_SUPPORT = 8;
+  SUPPORT = 9;
+  HEAD_ID = 10;
+  INVALID_LENGTH = 11;
+  INVALID_SDID = 12;
+  DUPLICATE_PACKET = 13;
+  RING_CONNECT_TIMEOUT = 90;
+}

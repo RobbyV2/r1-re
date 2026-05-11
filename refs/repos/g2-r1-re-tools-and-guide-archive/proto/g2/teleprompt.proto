@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+// teleprompt.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   teleprompt.pb.dart
+//   teleprompt.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum TelepromptErrorCode {
+  TELEPROMPT_SUCCESS = 0;
+  TELEPROMPT_ERR_FAIL = 1;
+  TELEPROMPT_ERR_CLOSED = 2;
+  TELEPROMPT_ERR_REPEATED_MESSAGE = 3;
+  TELEPROMPT_ERR_PD_DECODE_FAIL = 4;
+}
+
+enum TelepromptCtrlCmd {
+  CMD_NONE = 0;
+  START = 1;
+  PAUSE = 2;
+  RESUME = 3;
+  CLOSE = 4;
+}
+
+enum TelepromptMode {
+  MODE_AI = 0;
+  MODE_MANUAL = 1;
+  MODE_AUTO = 2;
+}
+
+enum TelepromptCommandId {
+  TELEPROMPT_NONE = 0;
+  TELEPROMPT_CONTROL = 1;
+  TELEPROMPT_FILE_LIST = 2;
+  TELEPROMPT_PAGE_DATA = 3;
+  TELEPROMPT_PAGE_AI_SYNC = 4;
+  TELEPROMPT_STATUS_NOTIFY = 161;
+  TELEPROMPT_FILE_LIST_REQUEST = 162;
+  TELEPROMPT_FILE_SELECT = 163;
+  TELEPROMPT_PAGE_DATA_REQUEST = 164;
+  TELEPROMPT_PAGE_SCROLL_SYNC = 165;
+  TELEPROMPT_COMM_RESP = 166;
+  TELEPROMPT_HEART_BEAT = 255;
+}
+
+message TelepromptHeartBeat {
+  uint32 appPageId = 1;
+  uint32 appLineId = 2;
+  uint32 osPageId = 3;
+  uint32 osLineId = 4;
+}
+
+message TelepromptScrollSync {
+  uint32 pageId = 1;
+  uint32 lineId = 2;
+  uint32 mode = 3;
+}
+
+message TelepromptCommResp {
+  TelepromptErrorCode errCode = 1;
+}
+
+message TelepromptPageDataRequest {
+  uint32 pageId = 1;
+}
+
+message TelepromptFileSelect {
+  bytes fileId = 1;
+}
+
+message TelepromptFileListRequest {
+  // (no fields)
+}
+
+message TelepromptStatusNotify {
+  TelepromptCtrlCmd cmd = 1;
+  TelepromptErrorCode errCode = 2;
+}
+
+message TelepromptAISync {
+  uint32 pageId = 1;
+  uint32 lineId = 2;
+  uint32 charId = 3;
+}
+
+message TelepromptPageData {
+  uint32 pageId = 1;
+  uint32 pageLineCount = 2;
+  bytes pageText = 3;
+}
+
+message TelepromptFileList {
+  repeated TelepromptFileInfo files = 1;
+}
+
+message TelepromptControl {
+  TelepromptCtrlCmd cmd = 1;
+  TelepromptSetting startSettings = 2;
+}
+
+message TelepromptSetting {
+  TelepromptMode mode = 1;
+  uint32 startPageId = 2;
+  uint32 startLineId = 3;
+  uint32 totalPages = 4;
+  uint32 totalLines = 5;
+  uint32 displayWidth = 6;
+  uint32 scrollIntervalMs = 7;
+  uint32 countdownSeconds = 8;
+  uint32 useAudio = 9;
+}
+
+message TelepromptFileInfo {
+  bytes fileId = 1;
+  bytes filename = 2;
+}
+
+message TelepromptDataPackage {
+  TelepromptCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  TelepromptControl ctrl = 3;
+  TelepromptFileList fileList = 4;
+  TelepromptPageData pageData = 5;
+  TelepromptAISync aiSync = 6;
+  TelepromptStatusNotify statusNotify = 7;
+  TelepromptFileListRequest fileListReq = 8;
+  TelepromptFileSelect fileSelect = 9;
+  TelepromptPageDataRequest pageDataReq = 10;
+  TelepromptScrollSync scrollSync = 11;
+  TelepromptCommResp commResp = 12;
+  TelepromptHeartBeat heartBeat = 13;
+}

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+// dev_infomation.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   dev_infomation.pb.dart
+//   dev_infomation.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eDeviceConfigInfoItem {
+  ALL_INFO = 0;
+  DEVICE_BRIGHTNESS = 1;
+  DEVICE_ANTI_SHAKE_ENABLE = 2;
+  DEVICE_DISPLAY_MODE = 3;
+  DEVICE_WORK_MODE = 4;
+  DEVICE_WAKEUP_ANGLE = 5;
+  DEVICE_GLASSES_SN = 6;
+  DEVICE_DEVICE_SN = 7;
+  DEVICE_BLE_MAC = 8;
+}
+
+enum eSwitchState {
+  CLOSE = 0;
+  OPEN = 1;
+}
+
+message BleMac {
+  bytes mac = 1;
+  eErrorCode result = 2;
+}
+
+message HeadAngle {
+  uint32 angle = 1;
+  uint32 offset = 2;
+  eErrorCode result = 3;
+}
+
+message SnInfo {
+  bytes snId = 1;
+  eErrorCode result = 2;
+}
+
+message Mode {
+  uint32 mode = 1;
+  eErrorCode result = 2;
+}
+
+message ALSInfo {
+  uint32 brightness = 1;
+  eSwitchState autoOC = 2;
+  eErrorCode result = 3;
+}
+
+message DeviceInfoValue {
+  eDeviceConfigInfoItem cfgInfoItem = 1;
+  ALSInfo alsState = 2;
+  eSwitchState antiShakeEnable = 3;
+  Mode displayMode = 4;
+  Mode wakeMode = 5;
+  HeadAngle wakeupAngle = 6;
+  SnInfo glassesSN = 7;
+  SnInfo deviceSN = 8;
+  BleMac bleMac = 9;
+}
+
+message DeviceInfo {
+  repeated DeviceInfoValue infoValue = 1;
+  eErrorCode result = 2;
+}

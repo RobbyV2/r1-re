@@ -1,0 +1,291 @@
+syntax = "proto3";
+
+// EvenHub.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   EvenHub.pb.dart
+//   EvenHub.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum SystmEventCommandList {
+  SYSTEM_ENTER_TIMEOUT_PAGE_EVENT = 0;
+  SYSTEM_TIMEOUT_PAGE_EXIT_EVENT = 1;
+}
+
+enum EventSourceType {
+  TOUCH_EVENT_FORM_DUMMY_NULL = 0;
+  TOUCH_EVENT_FROM_GLASSES_R = 1;
+  TOUCH_EVENT_FROM_RING = 2;
+  TOUCH_EVENT_FROM_GLASSES_L = 3;
+}
+
+enum EvenHub_Cmd_List {
+  APP_REQUEST_CREATE_STARTUP_PAGE_PACKET = 0;
+  OS_RESPONSE_CREATE_STARTUP_PAGE_PACKET = 1;
+  OS_NOITY_EVENT_TO_APP_PACKET = 2;
+  APP_UPDATE_IMAGE_RAW_DATA_PACKET = 3;
+  OS_RESPONSE_IMAGE_RAW_DATA_PACKET = 4;
+  APP_UPDATE_TEXT_DATA_PACKET = 5;
+  OS_RESPONSE_TEXT_DATA_PACKET = 6;
+  APP_REQUEST_REBUILD_PAGE_PACKET = 7;
+  OS_RESPONSE_REBUILD_PAGE_PACKET = 8;
+  APP_REQUEST_SHUTDOWN_PAGE_PACKET = 9;
+  OS_RESPONSE_SHUTDOWN_PAGE_PACKET = 10;
+  OS_PRIVATE_EVENT_PACKET = 11;
+  APP_REQUEST_HEARTBEAT_PACKET = 12;
+  OS_RESPONSE_HEARTBEAT_PACKET = 13;
+  OS_PRIVATE_SYSTEM_EVENT_PACKET = 14;
+  APP_REQUEST_AUDIO_CTR_PACKET = 15;
+  OS_RESPONSE_AUDIO_CTR_PACKET = 16;
+  OS_NOTIFY_MENU_STARTUP_PACKET = 17;
+  APP_RESPONSE_MENU_STARTUP_FAILED_PACKET = 18;
+  APP_REQUEST_OPEN_IMU_PACKET = 19;
+  OS_RESPONSE_IMU_PACKET = 20;
+}
+
+enum OsEventTypeList {
+  CLICK_EVENT = 0;
+  SCROLL_TOP_EVENT = 1;
+  SCROLL_BOTTOM_EVENT = 2;
+  DOUBLE_CLICK_EVENT = 3;
+  FOREGROUND_ENTER_EVENT = 4;
+  FOREGROUND_EXIT_EVENT = 5;
+  ABNORMAL_EXIT_EVENT = 6;
+  SYSTEM_EXIT_EVENT = 7;
+  IMU_DATA_REPORT = 8;
+}
+
+enum EvenHub_ErrorCode_List {
+  APP_REQUEST_CREATE_PAGE_SUCCESS = 0;
+  APP_REQUEST_CREATE_INVAILD_CONTAINER = 1;
+  APP_REQUEST_CREATE_OVERSIZE_RESPONSE_CONTAINER = 2;
+  APP_REQUEST_CREATE_OUTOFMEMORY_CONTAINER = 3;
+  APP_REQUEST_UPGRADE_IMAGE_RAW_DATA_SUCCESS = 4;
+  APP_REQUEST_UPGRADE_IMAGE_RAW_DATA_FAILED = 5;
+  APP_REQUEST_REBUILD_PAGE_SUCCESS = 6;
+  APP_REQUEST_REBUILD_PAGE_FAILD = 7;
+  APP_REQUEST_UPGRADE_TEXT_DATA_SUCCESS = 8;
+  APP_REQUEST_UPGRADE_TEXT_DATA_FAILED = 9;
+  APP_REQUEST_UPGRADE_SHUTDOWN_SUCCESS = 10;
+  APP_REQUEST_UPGRADE_SHUTDOWN_FAILED = 11;
+  APP_REQUEST_UPGRADE_HEARTBEAT_PACKET_SUCCESS = 12;
+  APP_REQUEST_AUDIO_CTR_SUCCESS = 13;
+  APP_REQUEST_AUDIO_CTR_FAILED = 14;
+}
+
+message evenhub_main_msg_ctx {
+  EvenHub_Cmd_List Cmd = 1;
+  uint32 MagicRandom = 2;
+  CreateStartUpPageContainer CreateMessage = 3;
+  ResponseCreateStartupCmd StartupResCmd = 4;
+  ImageRawDataUpdate ImgRawMsg = 5;
+  ResponseImageRawDataCmd ImgResCmd = 6;
+  RebuildPageContainer RebuildContainer = 7;
+  ResponseRebuildCmd RebuildResCmd = 8;
+  TextContainerUpgrade TextUpgrade = 9;
+  ResponseTextUpgradeCmd TextResCmd = 10;
+  ShutDownContaniner ShutDownCmd = 11;
+  ResponseShutDownCmd ShutDownResCmd = 12;
+  SendDeviceEvent DevEvent = 13;
+  HeartBeatPacket HeartPacketCmd = 14;
+  ResponseHeartBeatCmd DevResHeartPacket = 15;
+  CommonDevicePrivateEvent DevPrivateEvent = 16;
+  CommonDevicePrivateSystemEvent DevSysEvent = 17;
+  AudioCtrCmd AudioCtrCommand = 18;
+  AudioResCmd AudioResCommand = 19;
+  MenuStartUpEvent MenuStartEv = 20;
+  MenuStartUpResPonse MenuRes = 21;
+  IMU_CtrlCmd ImuCtrl = 22;
+  IMU_CtrlCmd_Response IMURes = 23;
+}
+
+message IMU_CtrlCmd_Response {
+  uint32 IMUReportEnStatus = 1;
+}
+
+message IMU_CtrlCmd {
+  uint32 IMUReportEn = 1;
+  uint32 reportFrq = 2;
+}
+
+message MenuStartUpResPonse {
+  uint32 errorCode = 1;
+  string errorString = 2;
+}
+
+message MenuStartUpEvent {
+  uint32 widgetId = 1;
+}
+
+message AudioResCmd {
+  uint32 AudioStat = 1;
+}
+
+message AudioCtrCmd {
+  uint32 AudoFuncEn = 1;
+}
+
+message CommonDevicePrivateSystemEvent {
+  SystmEventCommandList EventCmd = 1;
+  uint32 EventValue = 2;
+}
+
+message ResponseHeartBeatCmd {
+  uint32 Cnt = 1;
+  EvenHub_ErrorCode_List ResCmdMsg = 2;
+}
+
+message HeartBeatPacket {
+  uint32 Cnt = 1;
+}
+
+message CommonDevicePrivateEvent {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  uint32 eventId = 3;
+  uint32 eventData = 4;
+}
+
+message ResponseShutDownCmd {
+  EvenHub_ErrorCode_List ResCmdMsg = 1;
+}
+
+message ShutDownContaniner {
+  uint32 exitMode = 1;
+}
+
+message ResponseRebuildCmd {
+  EvenHub_ErrorCode_List ResCmdMsg = 1;
+}
+
+message RebuildPageContainer {
+  uint32 ContainerTotalNum = 1;
+  repeated ListContainerProperty ListObject = 2;
+  repeated TextContainerProperty TextObject = 3;
+  repeated ImageContainerProperty ImageObject = 4;
+}
+
+message ResponseCreateStartupCmd {
+  EvenHub_ErrorCode_List ResCmdMsg = 1;
+}
+
+message CreateStartUpPageContainer {
+  uint32 ContainerTotalNum = 1;
+  repeated ListContainerProperty ListObject = 2;
+  repeated TextContainerProperty TextObject = 3;
+  repeated ImageContainerProperty ImageObject = 4;
+  uint32 widgetId = 5;
+}
+
+message ImageContainerProperty {
+  uint32 XPosition = 1;
+  uint32 YPosition = 2;
+  uint32 Width = 3;
+  uint32 Height = 4;
+  uint32 ContainerID = 5;
+  string ContainerName = 6;
+}
+
+message ResponseImageRawDataCmd {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  uint32 MapSessionId = 3;
+  uint32 MapTotalSize = 4;
+  uint32 CompressMode = 5;
+  uint32 MapFragmentIndex = 6;
+  uint32 MapFragmentPacketSize = 7;
+  EvenHub_ErrorCode_List ErrorCode = 8;
+}
+
+message ImageRawDataUpdate {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  uint32 MapSessionId = 3;
+  uint32 MapTotalSize = 4;
+  uint32 CompressMode = 5;
+  uint32 MapFragmentIndex = 6;
+  uint32 MapFragmentPacketSize = 7;
+  bytes MapRawData = 8;
+}
+
+message TextContainerProperty {
+  uint32 XPosition = 1;
+  uint32 YPosition = 2;
+  uint32 Width = 3;
+  uint32 Height = 4;
+  uint32 BorderWidth = 5;
+  uint32 BorderColor = 6;
+  uint32 BorderRadius = 7;
+  uint32 PaddingLength = 8;
+  uint32 ContainerID = 9;
+  string ContainerName = 10;
+  uint32 IsEventCapture = 11;
+  string Content = 12;
+}
+
+message ResponseTextUpgradeCmd {
+  EvenHub_ErrorCode_List ResCmdMsg = 1;
+}
+
+message TextContainerUpgrade {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  uint32 ContentOffset = 3;
+  uint32 ContentLength = 4;
+  string Content = 5;
+}
+
+message ListContainerProperty {
+  uint32 XPosition = 1;
+  uint32 YPosition = 2;
+  uint32 Width = 3;
+  uint32 Height = 4;
+  uint32 BorderWidth = 5;
+  uint32 BorderColor = 6;
+  uint32 BorderRadius = 7;
+  uint32 PaddingLength = 8;
+  uint32 ContainerID = 9;
+  string ContainerName = 10;
+  List_ItemContainerProperty ItemContainer = 11;
+  uint32 IsEventCapture = 12;
+}
+
+message List_ItemContainerProperty {
+  uint32 ItemCount = 1;
+  uint32 ItemWidth = 2;
+  uint32 IsItemSelectBorderEn = 3;
+  repeated string ItemName = 4;
+}
+
+message SendDeviceEvent {
+  List_ItemEvent ListEvent = 1;
+  Text_ItemEvent TextEvent = 2;
+  Sys_ItemEvent SysEvent = 3;
+}
+
+message Sys_ItemEvent {
+  OsEventTypeList EventType = 1;
+  EventSourceType EventSource = 2;
+  IMU_Report_Data IMUData = 3;
+  uint32 systemExitReasonCode = 4;
+}
+
+message IMU_Report_Data {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Text_ItemEvent {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  OsEventTypeList EventType = 3;
+}
+
+message List_ItemEvent {
+  uint32 ContainerID = 1;
+  string ContainerName = 2;
+  string CurrentSelectItemName = 3;
+  uint32 CurrentSelectItemIndex = 4;
+  OsEventTypeList EventType = 5;
+}

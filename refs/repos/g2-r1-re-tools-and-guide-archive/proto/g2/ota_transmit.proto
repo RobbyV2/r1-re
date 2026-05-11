@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+// ota_transmit.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   ota_transmit.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eOTATransmitRsp {
+  OTA_RECV_RSP_SUCCESS = 0;
+  OTA_RECV_RSP_HEADER_ERR = 1;
+  OTA_RECV_RSP_PATH_ERR = 2;
+  OTA_RECV_RSP_CRC_ERR = 3;
+  OTA_RECV_RSP_TIMEOUT = 4;
+  OTA_RECV_RSP_NO_RESOURCES = 5;
+  OTA_RECV_RSP_FLASH_WRITE_ERR = 6;
+  OTA_RECV_RSP_CHECK_FAIL = 7;
+  OTA_RECV_RSP_UPDATING = 8;
+  OTA_RECV_RSP_SYS_RESTART = 9;
+  OTA_RECV_RSP_FAIL = 10;
+}
+
+enum eOTATransmitCID {
+  OTA_TRANSMIT_START = 0;
+  OTA_TRANSMIT_INFORMATION = 1;
+  OTA_TRANSMIT_FILE = 2;
+  OTA_TRANSMIT_RESULT_CHECK = 3;
+  OTA_TRANSMIT_NOTIFY = 4;
+}

@@ -1,0 +1,24 @@
+[submodule "refs/repos/even-g2-notes"]
+	path = refs/repos/even-g2-notes
+	url = https://github.com/nickustinov/even-g2-notes.git
+[submodule "refs/repos/Even-G2-RE"]
+	path = refs/repos/Even-G2-RE
+	url = https://github.com/lonelyobserver0/Even-G2-RE.git
+[submodule "refs/repos/g2-r1-re-tools-and-guide"]
+	path = refs/repos/g2-r1-re-tools-and-guide
+	url = https://github.com/Commute773/g2-r1-re-tools-and-guide.git
+[submodule "refs/repos/even-g2-protocol"]
+	path = refs/repos/even-g2-protocol
+	url = https://github.com/i-soxi/even-g2-protocol.git
+[submodule "refs/repos/even-toolkit"]
+	path = refs/repos/even-toolkit
+	url = https://github.com/fabioglimb/even-toolkit.git
+[submodule "refs/repos/everything-evenhub"]
+	path = refs/repos/everything-evenhub
+	url = https://github.com/even-realities/everything-evenhub.git
+[submodule "refs/repos/evenhub-templates"]
+	path = refs/repos/evenhub-templates
+	url = https://github.com/even-realities/evenhub-templates.git
+[submodule "refs/repos/g2-kit-unofficial"]
+	path = refs/repos/g2-kit-unofficial
+	url = https://github.com/Commute773/g2-kit-unofficial.git

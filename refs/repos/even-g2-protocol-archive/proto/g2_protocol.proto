@@ -1,0 +1,210 @@
+// Even Realities G2 Protocol Buffers
+// Reverse engineered from BLE traffic analysis
+//
+// NOTE: Field numbers and types are inferred from captured packets.
+// Some fields may be incomplete or incorrectly typed.
+
+syntax = "proto3";
+
+package even.g2;
+
+// =============================================================================
+// Transport Layer
+// =============================================================================
+
+// Not a protobuf - binary header format:
+// [0xAA] [type] [seq] [len] [pkt_tot] [pkt_ser] [svc_hi] [svc_lo] [payload] [crc16]
+
+// =============================================================================
+// Authentication Service (0x80-00, 0x80-20)
+// =============================================================================
+
+message AuthRequest {
+  uint32 type = 1;          // 0x04 = capability, 0x80 = time sync
+  uint32 msg_id = 2;
+  AuthData data = 3;
+}
+
+message AuthData {
+  uint32 capability = 1;    // 0x01 = basic, 0x04 = full
+}
+
+message TimeSyncRequest {
+  uint32 type = 1;          // 0x80
+  uint32 msg_id = 2;
+  TimeSyncData sync = 16;   // Field 16 (0x82 0x08)
+}
+
+message TimeSyncData {
+  uint32 unknown1 = 2;      // Always 17 (0x11)?
+  uint64 timestamp = 1;     // Unix timestamp (varint)
+  int64 transaction_id = 2; // Usually -24 (0xFFFFFFFFFFFFFFE8)
+}
+
+// =============================================================================
+// Teleprompter Service (0x06-20)
+// =============================================================================
+
+message TeleprompterMessage {
+  uint32 type = 1;          // 1=init, 2=list, 3=content, 4=complete, 255=marker
+  uint32 msg_id = 2;
+
+  // One of the following based on type:
+  TeleprompterInit init = 3;           // type=1
+  TeleprompterList list = 4;           // type=2
+  TeleprompterContent content = 5;     // type=3
+  TeleprompterComplete complete = 6;   // type=4
+  TeleprompterMarker marker = 13;      // type=255
+}
+
+message TeleprompterInit {
+  uint32 script_index = 1;
+  TeleprompterDisplaySettings display = 2;
+}
+
+message TeleprompterDisplaySettings {
+  uint32 field1 = 1;            // Always 1
+  uint32 field2 = 2;            // Always 0
+  uint32 field3 = 3;            // Always 0
+  uint32 display_width = 4;     // 267
+  uint32 content_height = 5;    // Total content height (affects scroll bar)
+  uint32 line_height = 6;       // 230
+  uint32 viewport_height = 7;   // 1294 (visible area)
+  uint32 font_size = 8;         // 5
+  uint32 scroll_mode = 9;       // 0=manual, 1=AI
+}
+
+message TeleprompterList {
+  repeated TeleprompterScript scripts = 1;
+}
+
+message TeleprompterScript {
+  string script_id = 1;     // e.g., "teleprompter_createdId_1766814694346"
+  string title = 2;         // e.g., "Teleprompt Title"
+}
+
+message TeleprompterContent {
+  uint32 page_number = 1;   // 0-indexed
+  uint32 line_count = 2;    // Always 10
+  bytes text = 3;           // UTF-8 with \n separators
+}
+
+message TeleprompterComplete {
+  uint32 start_page = 1;    // Always 0
+  uint32 total_pages = 2;
+  uint32 total_lines = 3;
+}
+
+message TeleprompterMarker {
+  uint32 field1 = 1;        // Always 0
+  uint32 field2 = 2;        // Always 6
+}
+
+// Start command (type=1 with state)
+message TeleprompterStart {
+  uint32 type = 1;          // 1
+  uint32 msg_id = 2;
+  TeleprompterState state = 3;
+}
+
+message TeleprompterState {
+  uint32 state = 1;         // 4 = START
+}
+
+// =============================================================================
+// Display Config Service (0x0E-20)
+// =============================================================================
+
+message DisplayConfig {
+  uint32 type = 1;          // 2
+  uint32 msg_id = 2;
+  DisplaySettings settings = 4;
+}
+
+message DisplaySettings {
+  uint32 enabled = 1;
+  repeated DisplayRegion regions = 2;
+  uint32 field3 = 3;
+}
+
+message DisplayRegion {
+  uint32 region_id = 1;     // 2, 3, 4, 5, 6
+  uint32 param1 = 2;        // Varies
+  float param2 = 3;         // Float (IEEE 754)
+  float param3 = 4;         // Float
+  uint32 param4 = 5;        // 0
+  uint32 param5 = 6;        // 0
+}
+
+// =============================================================================
+// Sync Service (0x80-00)
+// =============================================================================
+
+message SyncMessage {
+  uint32 type = 1;          // 0x0E = sync trigger
+  uint32 msg_id = 2;
+  bytes data = 13;          // Empty (6A-00)
+}
+
+// =============================================================================
+// Dashboard Service (0x07-20)
+// =============================================================================
+
+message DashboardMessage {
+  uint32 type = 1;
+  uint32 msg_id = 2;
+  DashboardWidget widget = 3;
+}
+
+message DashboardWidget {
+  uint32 widget_type = 1;   // Calendar, weather, etc.
+  bytes content = 2;        // Widget-specific data
+}
+
+// =============================================================================
+// Display Wake Service (0x04-20)
+// =============================================================================
+
+message DisplayWake {
+  uint32 type = 1;          // 1
+  uint32 msg_id = 2;
+  DisplayWakeSettings settings = 3;
+}
+
+message DisplayWakeSettings {
+  uint32 field1 = 1;        // 1
+  uint32 field2 = 2;        // 1
+  uint32 field3 = 3;        // 5
+  uint32 field5 = 5;        // 1
+}
+
+// =============================================================================
+// Conversate Service (0x0B-20)
+// =============================================================================
+
+message ConversateMessage {
+  uint32 type = 1;
+  uint32 msg_id = 2;
+  ConversateTranscript transcript = 7;  // Field 7
+}
+
+message ConversateTranscript {
+  string text = 1;          // Transcribed text
+  bool is_final = 2;        // True if final result
+}
+
+// =============================================================================
+// Notification Service (0x02-20)
+// =============================================================================
+
+message NotificationMessage {
+  uint32 type = 1;
+  uint32 msg_id = 2;
+  NotificationData notification = 3;
+}
+
+message NotificationData {
+  uint32 app_id = 1;        // e.g., 0x1A = Gmail
+  uint32 count = 2;         // Number of notifications
+  // NOTE: No text content - only metadata
+}

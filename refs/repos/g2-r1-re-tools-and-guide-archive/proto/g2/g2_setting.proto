@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+// g2_setting.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   g2_setting.pb.dart
+//   g2_setting.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum App_Respond_Flag {
+  APP_RESPOND_SUCCESS = 0;
+  APP_RESPOND_PARAMETER_ERROR = 1;
+}
+
+enum Device_Respond_Flag {
+  DEVICE_RESPOND_SUCCESS = 0;
+  DEVICE_RESPOND_PARAMETER_ERROR = 1;
+}
+
+enum ApplicationType {
+  app_unable = 0;
+  app_menu = 1;
+}
+
+enum APPRequestSettingType {
+  APP_REQUIRE_BRIGHTNESS_INFO = 0;
+  APP_REQUIRE_BASIC_SETTING = 1;
+}
+
+enum g2_settingCommandId {
+  NONE_COMMAND = 0;
+  DeviceReceiveInfo = 1;
+  DeviceReceiveRequest = 2;
+  DeviceSendToAPP = 3;
+  DeviceRespondToAPP = 4;
+  AppRespondToDevice = 5;
+}
+
+message APP_Control_Device {
+  uint32 turnOnDevice = 1;
+}
+
+message App_Respond_To_Device {
+  uint32 packageId = 1;
+  App_Respond_Flag receiveFlag = 2;
+}
+
+message Device_Respond_To_App {
+  uint32 packageId = 1;
+  Device_Respond_Flag receiveFlag = 2;
+}
+
+message APP_Send_Dominant_Hand {
+  uint32 dominantHand = 1;
+}
+
+message APP_Send_Gesture_Control_List {
+  repeated APP_Send_Gesture_Control gestureControlList = 1;
+}
+
+message APP_Send_Gesture_Control {
+  uint32 screenOn = 1;
+  uint32 operationType = 2;
+  ApplicationType apptype = 3;
+}
+
+message APP_Send_Universe_Setting {
+  uint32 unitFormat = 1;
+  uint32 distanceUnit = 2;
+  uint32 timeFormat = 3;
+  uint32 dateFormat = 4;
+  uint32 temperatureUnit = 5;
+}
+
+message DeviceSendInfoToAPP {
+  uint32 currentRecalibrationStatus = 1;
+  uint32 silentModeSwitch = 2;
+}
+
+message DeviceReceiveRequestFromAPP {
+  APPRequestSettingType settingInfoType = 1;
+  uint32 autoBrightnessLevel = 2;
+  uint32 yCoordinateLevelRestored = 3;
+  uint32 xCoordinateLevelRestored = 4;
+  string leftSoftwareVersion = 5;
+  string rightSoftwareVersion = 6;
+  uint32 headUpSwitchRestored = 7;
+  uint32 headUpAngleRestored = 8;
+  uint32 headUpAngleCalibrationRestored = 9;
+  uint32 wearDetectionSwitchRestored = 10;
+  uint32 deviceRunningStatus = 11;
+  uint32 battery = 12;
+  uint32 chargingStatus = 13;
+  uint32 silentModeSwitchRestored = 14;
+  uint32 leftCalibrationRestored = 15;
+  uint32 rightCalibrationRestored = 16;
+  uint32 headUpRecalibrationSuccess = 17;
+  uint32 autoBrightnessSwitchRestored = 18;
+  uint32 unreadMessageCount = 19;
+}
+
+message DeviceReceiveInfoFromAPP {
+  DeviceReceive_Brightness deviceReceiveBrightness = 1;
+  DeviceReceive_Y_Coordinate deviceReceiveYCoordinate = 2;
+  DeviceReceive_X_Coordinate deviceReceiveXCoordinate = 3;
+  DeviceReceive_Head_UP_Setting deviceReceiveHeadUpSetting = 4;
+  Wear_Detection_Setting deviceReceiveWearDetection = 5;
+  DeviceReceive_Silent_Mode_Setting deviceReceiveSilentMode = 6;
+  DeviceReceive_APP_PAGE deviceReceiveAppPage = 7;
+  DeviceReceive_Advanced_Setting deviceReceiveAdvancedSetting = 8;
+  APP_Send_Universe_Setting appSendUniverseSetting = 9;
+  APP_Send_Gesture_Control_List appSendGestureControlList = 10;
+  APP_Send_Dominant_Hand appSendDominantHand = 11;
+  APP_Control_Device appControlDevice = 12;
+}
+
+message DeviceReceive_Advanced_Setting {
+  uint32 killAllFeature = 1;
+}
+
+message DeviceReceive_APP_PAGE {
+  uint32 appPage = 1;
+}
+
+message DeviceReceive_Silent_Mode_Setting {
+  uint32 silentModeSwitch = 1;
+}
+
+message Wear_Detection_Setting {
+  uint32 wearDetectionSwitch = 1;
+}
+
+message DeviceReceive_Head_UP_Setting {
+  uint32 headUpSwitch = 1;
+  uint32 headUpAngle = 2;
+  uint32 headUpCalibrationSwitch = 3;
+  uint32 headUpCalibration = 4;
+}
+
+message DeviceReceive_X_Coordinate {
+  uint32 xCoordinateLevel = 1;
+}
+
+message DeviceReceive_Y_Coordinate {
+  uint32 yCoordinateLevel = 1;
+}
+
+message DeviceReceive_Brightness {
+  uint32 autoAdjust = 1;
+  uint32 brightnessLevel = 2;
+  uint32 leftCalibration = 3;
+  uint32 rightCalibration = 4;
+}
+
+message G2SettingPackage {
+  g2_settingCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  DeviceReceiveInfoFromAPP deviceReceiveInfoFromApp = 3;
+  DeviceReceiveRequestFromAPP deviceReceiveRequestFromApp = 4;
+  DeviceSendInfoToAPP deviceSendInfoToApp = 5;
+  Device_Respond_To_App deviceRespondToApp = 6;
+  App_Respond_To_Device appRespondToDevice = 7;
+}

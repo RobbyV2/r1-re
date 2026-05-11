@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+// onboarding.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   onboarding.pb.dart
+//   onboarding.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eOnboardingEvent {
+  UNKNOWN_EVENT = 0;
+  GLS_WEAR_STATUS = 1;
+}
+
+enum eOnboardingProcessId {
+  UNKNOWN_PROCESS = 0;
+  START_UP = 1;
+  TOUCH = 2;
+  HEAD_UP = 3;
+  FINISH = 4;
+}
+
+enum eOnboardingCommandId {
+  NONE_COMMAND = 0;
+  CONFIG = 1;
+  HEARTBEAT = 2;
+  EVENT = 3;
+}
+
+message OnboardingEvent {
+  eOnboardingEvent event = 1;
+  uint32 eventParam = 2;
+  eErrorCode errorCode = 3;
+}
+
+message OnboardingHeartbeat {
+  eErrorCode errorCode = 1;
+}
+
+message OnboardingConfig {
+  eOnboardingProcessId processId = 1;
+  eErrorCode errorCode = 2;
+}
+
+message OnboardingDataPackage {
+  eOnboardingCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  OnboardingConfig config = 3;
+  OnboardingHeartbeat heartbeat = 4;
+  OnboardingEvent event = 5;
+}

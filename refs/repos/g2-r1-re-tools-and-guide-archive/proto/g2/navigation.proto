@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+// navigation.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   navigation.pb.dart
+//   navigation.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum Navigation_Cmd_list {
+  APP_SEND_HEARTBEAT_CMD = 0;
+  OS_NOTIFY_MENU_STARTUP_REQUEST_LOCATION_LIST = 1;
+  APP_RESPONSE_LOCATION_LIST = 2;
+  APP_RESPONSE_LOCATION_NONE = 3;
+  OS_NOTIFY_LOCATION_SELECTED = 4;
+  APP_REQUEST_START_UP = 5;
+  APP_SEND_ERROR_INFO_MSG = 6;
+  APP_SEND_BASIC_INFO = 7;
+  APP_SNED_MINI_MAP_FILE = 8;
+  APP_SEND_MAX_MAP_FILE = 9;
+  APP_REQUEST_RECALCULATING_LOCATION_START = 10;
+  APP_REQUEST_NAVIGATION_COMPLETE = 11;
+  APP_REQUEST_EXIT = 12;
+  OS_NOTIFY_EXIT = 13;
+  OS_NOTIFY_REVIEW_CHANGED = 14;
+  OS_NOTIFY_COMPASS_CHANGED = 15;
+  OS_NOTIFY_COMPASS_CALIBRATE_STRAT = 16;
+  OS_NOTIFY_COMPASS_CALIBRATE_COMPLETE = 17;
+}
+
+message navigation_main_msg_ctx {
+  Navigation_Cmd_list cmd = 1;
+  uint32 magicRandom = 2;
+  extend_info_msg extMsg = 3;
+  LocationList_msg list = 4;
+  basic_info_msg info = 5;
+  mini_map_msg miniMapData = 6;
+  max_map_msg maxMapData = 7;
+  os_select_location_msg selectIndex = 8;
+  view_info_msg viewMsg = 9;
+  compass_info_msg compassMsg = 10;
+}
+
+message compass_info_msg {
+  uint32 compassIndex = 1;
+}
+
+message view_info_msg {
+  uint32 viewIndex = 1;
+}
+
+message extend_info_msg {
+  eErrorCode errorCode = 1;
+  string errorMessage = 2;
+  uint32 errorIndex = 3;
+}
+
+message max_map_msg {
+  uint32 mapSessionId = 1;
+  uint32 mapTotalSize = 2;
+  uint32 compressMode = 3;
+  uint32 mapFragmentIndex = 4;
+  uint32 mapFragmentPacketSize = 5;
+  bytes mapRawData = 6;
+  eErrorCode errorCode = 7;
+}
+
+message mini_map_msg {
+  uint32 mapSize = 1;
+  uint32 compressMode = 2;
+  bytes mapRawData = 3;
+  eErrorCode errorCode = 4;
+  uint32 rotationAngle = 5;
+  uint32 miniMapBorderEn = 6;
+}
+
+message basic_info_msg {
+  uint32 directionSignIndex = 1;
+  string distance = 2;
+  string roadName = 3;
+  string spendTime = 4;
+  string remainDistance = 5;
+  string etaTime = 6;
+  string speed = 7;
+  uint32 navigateWorkMethod = 8;
+  eErrorCode errorCode = 9;
+}
+
+message os_select_location_msg {
+  string locationName = 1;
+  eErrorCode errorCode = 2;
+  uint32 locationIndex = 3;
+  uint32 navigateMethod = 4;
+}
+
+message LocationList_msg {
+  uint32 listNum = 1;
+  repeated string locationName = 2;
+  repeated uint32 locationIconIndex = 3;
+  eErrorCode errorCode = 4;
+}

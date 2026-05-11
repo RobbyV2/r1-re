@@ -1,0 +1,379 @@
+syntax = "proto3";
+
+// dashboard.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   dashboard.pb.dart
+//   dashboard.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum PageWidgetType {
+  PAGE_WIDGET_UNKNOWN = 0;
+  PAGE_WIDGET_NEWS = 1;
+  PAGE_WIDGET_STOCK = 2;
+  PAGE_WIDGET_SCHEDULE = 3;
+  PAGE_WIDGET_QUICKLIST = 4;
+  PAGE_WIDGET_HEALTH = 5;
+}
+
+enum PageType {
+  PAGE_TYPE_UNKNOWN = 0;
+  PAGE_TYPE_DASHBOARD_MAIN = 1;
+  PAGE_TYPE_NEWS_EXPANDED = 2;
+  PAGE_TYPE_STOCK_EXPANDED = 3;
+  PAGE_TYPE_CALENDAR_EXPANDED = 4;
+  PAGE_TYPE_QUICKLIST_EXPANDED = 5;
+  PAGE_TYPE_HEALTH_EXPANDED = 6;
+}
+
+enum AppReceiveFLAG {
+  APP_RECEIVED_SUCCESS = 0;
+  APP_PARAMETER_ERROR = 1;
+}
+
+enum DashboardReceiveFLAG {
+  DASHBOARD_RECEIVED_SUCCESS = 0;
+  DASHBOARD_PARAMETER_ERROR = 1;
+  DASHBOARD_NEWS_VERSION_ERROR = 2;
+}
+
+enum WidgetType {
+  WIDGET_UNKNOWN = 0;
+  WIDGET_NEWS = 1;
+  WIDGET_STOCK = 2;
+  WIDGET_SCHEDULE = 3;
+  WIDGET_QUICKLIST = 4;
+  WIDGET_HEALTH = 5;
+}
+
+enum StatusType {
+  STATUS_UNKNOWN = 0;
+  STATUS_WEATHER = 1;
+  STATUS_MESSAGE = 2;
+  STATUS_Power = 3;
+  STATUS_HEALTH = 4;
+}
+
+enum WeatherType {
+  WEATHER_UNKNOWN = 0;
+  WEATHER_SUNNY = 1;
+  WEATHER_CLOUDS = 2;
+  WEATHER_DRIZZLE = 3;
+  WEATHER_HEAVY_DRIZZLE = 4;
+  WEATHER_RAIN = 5;
+  WEATHER_HEAVY_RAIN = 6;
+  WEATHER_THUNDERSTORM = 7;
+  WEATHER_THUNDER = 8;
+  WEATHER_SNOW = 9;
+  WEATHER_MIST = 10;
+  WEATHER_FOG = 11;
+  WEATHER_DUST = 12;
+  WEATHER_SQUAILS = 13;
+  WEATHER_TORNADO = 14;
+  WEATHER_FREEZING_RAIN = 15;
+  WEATHER_NIGHT = 16;
+}
+
+enum TemperatureUnit {
+  TEMP_UNIT_UNKNOWN = 0;
+  TEMP_UNIT_CELSIUS = 1;
+  TEMP_UNIT_FAHRENHEIT = 2;
+}
+
+enum NewsNotifyEvent {
+  WIDGET_EXPAND_LISTPAGE_EVENT = 0;
+  LISTPAGE_BACK_WIDGET_EVENT = 1;
+  LISTPAGE_SCROLL_EVENT = 2;
+  LISTPAGE_EXPAND_TEXTPAGE_EVENT = 3;
+  TEXTPAGE_BACK_LISTPAGE_EVENT = 4;
+}
+
+enum eDashboardCommandId {
+  NONE_COMMAND = 0;
+  Dashboard_Respond = 1;
+  Dashboard_Receive = 2;
+  APP_Respond = 3;
+  APP_RECEIVE = 4;
+  REQUEST_NEWS_INFO = 5;
+  RESPONSE_NEWS_INFO = 6;
+  APP_REQUEST_NEWS_INFO = 7;
+  DEV_RESPONSE_NEWS_INFO = 8;
+  APP_SEND_NEWS_DATA = 9;
+  DEV_RESPONSE_NEWS_DATA = 10;
+  DEV_REQUEST_NEWS_UPGRADE = 11;
+  DEV_NOTIFY_NEWS_EVENT = 12;
+  APP_REQUEST_CLEAR_ALL_DATA = 13;
+  DEV_RESPONSE_CLEAR_ALL_DATA = 14;
+}
+
+message sPageStateSync {
+  PageType currentPageType = 1;
+  DashboardMainPageState dashboardMain = 2;
+  NewsExpandedPageState newsExpanded = 3;
+  StockExpandedPageState stockExpanded = 4;
+  CalendarExpandedPageState calendarExpanded = 5;
+  QuicklistExpandedPageState quicklistExpanded = 6;
+  HealthExpandedPageState healthExpanded = 7;
+}
+
+message HealthExpandedPageState {
+  uint32 currentPageIndex = 1;
+}
+
+message QuicklistExpandedPageState {
+  uint32 displayedUidCount = 1;
+  repeated uint32 displayedUidList = 2;
+  uint32 borderState = 3;
+  uint32 focusedUidIndex = 4;
+  bytes focusedUidCompleted = 5;
+}
+
+message CalendarExpandedPageState {
+  uint32 currentPageIndex = 1;
+}
+
+message StockExpandedPageState {
+  uint32 currentPageIndex = 1;
+}
+
+message NewsExpandedPageState {
+  uint32 currentNewsIndex = 1;
+}
+
+message DashboardMainPageState {
+  uint32 activeTileIndex = 1;
+  PageWidgetType activeWidgetType = 2;
+}
+
+message DashboardSendToApp {
+  uint32 packageId = 1;
+  bytes reset = 2;
+  sStatusComponent statusComponents = 3;
+  sWidgetComponent widgetComponents = 4;
+  sPageStateSync pageStateSync = 5;
+}
+
+message AppRespondToDashboard {
+  uint32 packageId = 1;
+  AppReceiveFLAG flag = 2;
+}
+
+message DashboardContent {
+  rStatusComponent statusComponents = 1;
+  rWidgetComponent widgetComponents = 2;
+}
+
+message DashboardDisplaySetting {
+  uint32 displayMode = 1;
+  uint32 statusDisplayCount = 2;
+  repeated StatusType statusDisplayOrder = 3;
+  uint32 widgetDisplayCount = 4;
+  repeated WidgetType widgetDisplayOrder = 5;
+  uint32 halfDayFormat = 6;
+  uint32 temperatureUnit = 7;
+}
+
+message DashboardReceiveFromApp {
+  uint32 packageId = 1;
+  DashboardDisplaySetting bashboardDisplaySetting = 2;
+  DashboardContent bashboardConfig = 3;
+  AppRequest appRequest = 4;
+}
+
+message DashboardRespondToApp {
+  uint32 packageId = 1;
+  DashboardReceiveFLAG flag = 2;
+}
+
+message AppRequest {
+  uint32 appRequestNewsInfo = 1;
+}
+
+message sWidgetComponent {
+  sNewsWidget news = 1;
+  sStockWidget stock = 2;
+  sScheduleWidget schedule = 3;
+}
+
+message rWidgetComponent {
+  rNewsWidget news = 1;
+  rStockWidget stock = 2;
+  rScheduleWidget schedule = 3;
+}
+
+message sScheduleWidget {
+  uint32 syncScheduleId = 1;
+  uint32 syncScheduleLine = 2;
+}
+
+message Schedule {
+  uint32 scheduleId = 1;
+  string title = 2;
+  string location = 3;
+  string time = 4;
+  uint32 endTimestamp = 5;
+}
+
+message rScheduleWidget {
+  uint32 scheduleTotal = 1;
+  uint32 scheduleNum = 2;
+  Schedule schedule = 3;
+  uint32 scheduleAuthority = 4;
+}
+
+message sStockWidget {
+  string syncStockCode = 1;
+}
+
+message Stock {
+  string stockCode = 1;
+  string marketSuffix = 2;
+  float marketCap = 3;
+  double priceChangePercent = 4;
+  double currentPrice = 5;
+  string companyName = 6;
+  double dayHigh = 7;
+  double dayLow = 8;
+  double openPrice = 9;
+  uint64 volume = 10;
+  float marketValue = 11;
+  double peRatio = 12;
+  uint32 changingTrend = 13;
+  uint32 pointTotal = 14;
+  double darkPrice = 15;
+  repeated double brightPrice = 16;
+}
+
+message rStockWidget {
+  uint32 stockTotal = 1;
+  uint32 stockNum = 2;
+  Stock stock = 3;
+}
+
+message sNewsWidget {
+  sNewsWidgetApplyNews applyEvent = 1;
+  sNewsWidgetSync syncEvent = 2;
+}
+
+message sNewsWidgetSync {
+  uint32 syncNewsId = 1;
+  uint64 syncNewsBytesRead = 2;
+}
+
+message sNewsWidgetApplyNews {
+  uint32 requiredCount = 1;
+  uint32 requiredStartId = 2;
+}
+
+message News {
+  uint32 newsId = 1;
+  string title = 2;
+  uint64 reportTime = 3;
+  string source = 4;
+  string content = 5;
+}
+
+message rNewsWidget {
+  uint32 newsTotal = 1;
+  uint32 newsNum = 2;
+  News news = 3;
+  uint32 newsForceUpgrade = 4;
+}
+
+message sStatusComponent {
+  sNotificationStatus notification = 1;
+  sPowerStatus power = 2;
+}
+
+message rStatusComponent {
+  rWeatherStatus weather = 1;
+}
+
+message sPowerStatus {
+  double powerLeft = 1;
+  double powerRight = 2;
+}
+
+message sNotificationStatus {
+  uint32 unreadCount = 1;
+}
+
+message rWeatherStatus {
+  double temperature = 1;
+  TemperatureUnit unit = 2;
+  WeatherType type = 3;
+  uint64 updateTime = 4;
+}
+
+message DashboardDataPackage {
+  eDashboardCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  DashboardRespondToApp dashboardRespond = 3;
+  DashboardReceiveFromApp dashboardReceive = 4;
+  AppRespondToDashboard appRespond = 5;
+  DashboardSendToApp appReceive = 6;
+  RequestNewsFifoCountCmd ReqNewsCmd = 7;
+  ResponseNewsFifoMsg ResNewsMsg = 8;
+  AppRequestDeviceNewsInfo ReqNewsInfo = 9;
+  DeviceResponseNewsInfo ResNewsInfo = 10;
+  AppSendNewsData SendNewsData = 11;
+  DeviceResponseNewData ResNewsData = 12;
+  DeviceRequestNewsUpgrade ReqNewsUpgrade = 13;
+  DeviceNotifyNewsEvent NotifyNewsEvent = 14;
+  AppResetClearAllDataMsg ResClearAllData = 15;
+  DeviceResponseClearAllDataMsg RespClearAllData = 16;
+}
+
+message DeviceResponseClearAllDataMsg {
+  uint32 cmd = 1;
+}
+
+message AppResetClearAllDataMsg {
+  uint32 cmd = 1;
+}
+
+message DeviceNotifyNewsEvent {
+  NewsNotifyEvent eventID = 1;
+  uint32 value = 2;
+}
+
+message DeviceRequestNewsUpgrade {
+  uint32 cmd = 1;
+}
+
+message DeviceResponseNewData {
+  uint32 sessionId = 1;
+  uint32 sessionTotalCount = 2;
+  uint32 sessionNewsIndex = 3;
+  uint32 newsId = 4;
+  uint32 newsStatus = 5;
+}
+
+message AppSendNewsData {
+  uint32 sessionId = 1;
+  uint32 sessionStatus = 2;
+  uint32 sessionTotalCount = 3;
+  uint32 sessionNewsIndex = 4;
+  uint32 newsId = 5;
+  string title = 6;
+  uint64 reportTime = 7;
+  string source = 8;
+  string content = 9;
+}
+
+message DeviceResponseNewsInfo {
+  uint32 totalNewsCount = 1;
+  repeated uint32 newsId = 2;
+}
+
+message AppRequestDeviceNewsInfo {
+  uint32 cmd = 1;
+}
+
+message ResponseNewsFifoMsg {
+  uint32 count = 1;
+}
+
+message RequestNewsFifoCountCmd {
+  uint32 cmd = 1;
+}

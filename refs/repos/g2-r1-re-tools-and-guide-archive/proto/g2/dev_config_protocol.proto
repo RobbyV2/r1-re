@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+// dev_config_protocol.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   dev_config_protocol.pb.dart
+//   dev_config_protocol.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eDevCfgCommandId {
+  NONE_COMMAND = 0;
+  CONNECT_PRO = 1;
+  SERVICE_PRO = 2;
+  COMMAND_PRO = 3;
+  AUTHENTICATION = 4;
+  PIPE_ROLE_CHANGE = 5;
+  RING_CONNECT_INFO = 6;
+  BLE_CONNECT_PARAM = 7;
+  DISCONNECT_INFO = 8;
+  UNPAIR_INFO = 9;
+  COMMAND_EXCEPTION = 10;
+  SET_DEVICE_INFO = 11;
+  GET_DEVICE_INFO = 12;
+  RESTORE_TO_FACTORY_SETTINGS = 13;
+  BASE_CONNECT_HEART_BEAT = 14;
+  QUICK_RESTART = 15;
+  TIME_SYNC = 128;
+  AUD_CONTROL = 129;
+  COMMAND_ERROR = 255;
+}
+
+message DevCfgCmdException {
+  eDevCfgCommandId commandId = 1;
+  eErrorCode result = 2;
+}
+
+message DevCfgDataPackage {
+  eDevCfgCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  AuthMgr authMgr = 3;
+  PipeRoleChange roleChange = 4;
+  RingInfo ringInfo = 5;
+  BleConnectParam connParam = 6;
+  DisconnectInfo disconnectInfo = 7;
+  UnpairInfo unpairInfo = 8;
+  DevCfgCmdException commandException = 9;
+  DeviceInfo setDeviceInfo = 10;
+  DeviceInfo getDeviceInfo = 11;
+  RestoreFactory restoreFactory = 12;
+  BaseConnHeartBeat baseHeartBeat = 13;
+  QuickRestart quickRestart = 14;
+  TimeSync timeSync = 128;
+  AudControl AudControl = 129;
+}

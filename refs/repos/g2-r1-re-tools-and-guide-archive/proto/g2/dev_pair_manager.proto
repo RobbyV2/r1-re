@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+// dev_pair_manager.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   dev_pair_manager.pb.dart
+//   dev_pair_manager.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eDevice {
+  RING = 0;
+  GLASSES = 1;
+  RING_GLASSES = 2;
+  PHONE_IOS = 3;
+  PHONE_ANDROID = 4;
+}
+
+enum eGlassesLR {
+  BOTH = 0;
+  RIGHT = 1;
+  LEFT = 2;
+}
+
+enum eConnParamState {
+  SLOW = 0;
+  FAST = 1;
+}
+
+message UnpairInfo {
+  eDevice dev = 1;
+  bytes ringMac = 2;
+  eErrorCode result = 3;
+}
+
+message DisconnectInfo {
+  eDevice dev = 1;
+  bytes ringMac = 2;
+  eErrorCode result = 3;
+}
+
+message PipeRoleChange {
+  eGlassesLR asCmdRole = 1;
+  eErrorCode result = 2;
+}
+
+message BleConnectParam {
+  uint32 MTU = 1;
+  uint32 connInterval = 2;
+  eConnParamState setSpeed = 3;
+  bytes setSpeedRet = 4;
+  eErrorCode result = 5;
+}
+
+message RingInfo {
+  bytes connectRing = 1;
+  bytes ringMac = 2;
+  bytes ringName = 3;
+  uint32 connRet = 4;
+  eErrorCode result = 5;
+}
+
+message AuthMgr {
+  bytes secAuth = 1;
+  eDevice phoneType = 2;
+  eErrorCode result = 3;
+}

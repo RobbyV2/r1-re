@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+// sync_info.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   sync_info.pb.dart
+//   sync_info.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum Sync_Info_Cmd_list {
+  APP_REQUEST_SYNC_INFO = 0;
+  OS_NOTIFY_SYNC_INFO = 1;
+}
+
+message sync_info_main_msg_ctx {
+  Sync_Info_Cmd_list cmdList = 1;
+  uint32 magicRandom = 2;
+  sync_info_data_msg dataMsg = 3;
+}
+
+message sync_info_data_msg {
+  uint32 backgroundAppID = 1;
+  uint32 foregroundAppID = 2;
+}

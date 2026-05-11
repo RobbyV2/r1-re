@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+// ring.proto
+// Extracted from Blutter-decompiled com.even.sg Flutter AOT.
+// Generated 2026-04-13 via automated extraction from:
+//   ring.pb.dart
+//   ring.pbenum.dart
+// Types are reconstructed from BuilderInfo asm annotations + pp.txt pool dump.
+
+enum eRingEvent {
+  UNKNOWN_EVENT = 0;
+  BLE_ADV = 1;
+}
+
+enum eRingCommandId {
+  NONE_COMMAND = 0;
+  EVENT = 1;
+  RAW_DATA = 2;
+}
+
+message RingRawData {
+  uint32 battery = 1;
+  uint32 chargeStates = 2;
+  uint32 hr = 3;
+  uint32 hrTimestamp = 4;
+  uint32 spo2 = 5;
+  uint32 spo2Timestamp = 6;
+  uint32 hrv = 7;
+  uint32 hrvTimestamp = 8;
+  uint32 temp = 9;
+  uint32 tempTimestamp = 10;
+  uint32 actKcal = 11;
+  uint32 actKcalTimestamp = 12;
+  uint32 allKcal = 13;
+  uint32 allKcalTimestamp = 14;
+  uint32 steps = 15;
+  uint32 stepsTimestamp = 16;
+  eErrorCode errorCode = 17;
+}
+
+message RingEvent {
+  bytes ringMac = 1;
+  eRingEvent eventId = 2;
+  uint32 eventParam = 3;
+  eErrorCode errorCode = 4;
+}
+
+message RingDataPackage {
+  eRingCommandId commandId = 1;
+  uint32 magicRandom = 2;
+  RingEvent event = 3;
+  RingRawData rawData = 4;
+}
